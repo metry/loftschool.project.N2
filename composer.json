@@ -1,0 +1,20 @@
+{
+    "name": "metry/simple_mvc",
+    "description": "simple mvc realization",
+    "authors": [
+        {
+            "name": "metry",
+            "email": "fortrun.php@gmail.com"
+        }
+    ],
+    "config": {
+        "vendor-dir": "app/vendor/"
+    },
+    "autoload": {
+        "psr-4":
+        {
+            "App\\": "app/"
+        }
+    },
+    "require": {}
+}
