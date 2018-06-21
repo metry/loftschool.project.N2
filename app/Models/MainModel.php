@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Models;
+
+use \App\Core\Connection;
 
 class MainModel
 {
@@ -7,6 +10,6 @@ class MainModel
 
     public function __construct()
     {
-        $this->dbConnection = \App\Core\Connection::getInstance();
+        $this->dbConnection = Connection::getInstance();
     }
 }

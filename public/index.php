@@ -43,7 +43,7 @@ try {
         throw new Exception("Класс отсутсвует");
     }
     if (method_exists($controller, $actionName)) {
-        $controller->$actionName();
+        $controller->$actionName($parametres);
     } else {
         throw new Exception("Метод класса отсутсвует");
     }

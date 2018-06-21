@@ -11,8 +11,8 @@ class MainController
         $this->view = new View();
     }
 
-    public function defaultAction()
+    /*public function index()
     {
         echo 'Hi! It`s default action from MainController!';
-    }
+    }*/
 }

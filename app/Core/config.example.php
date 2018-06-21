@@ -3,9 +3,14 @@
  * Приложение находится в режиме логгирования ошибок
  * Для отключения логирования, необходимо закомментировать строку ниже
  */
-define('APPLICATION_TYPE', 'log');
+const APPLICATION_TYPE = 'log';
 
-const HOST = 'host';
-const DBNAME = 'database_name';
-const USER = 'username';
+/*
+ * задание соли для хэширования паролей
+ */
+const PASSWORD_SALT = '12a7gd6GA4SaD2GAs6gavJo2188';
+
+const HOST = 'localhost';
+const DBNAME = 'database';
+const USER = 'root';
 const PASS = 'password';
