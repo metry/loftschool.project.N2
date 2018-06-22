@@ -6,8 +6,8 @@ class Validation
 {
     const MAX_AGE = 99;
     const MIN_AGE = 1;
-    const ERROR_NAME = 'Имя - строка 3-21 символов ( A-Z a-z А-Я а-я 0-9 - _)';
-    const ERROR_PASSWORD = 'Пароль - строка 4-63 символов (кроме: пробельных - ~)';
+    const ERROR_NAME = 'Имя - строка 3-21 символов (A-Z a-z А-Я а-я 0-9 - _)';
+    const ERROR_PASSWORD = 'Пароль - строка 4-63 символов (A-Z a-z 0-9 ! @ # $ & *)';
     const ERROR_AGE = 'Укажите корректный возраст';
     const ERROR_USER_EXIST = 'Пользователь с таким именем уже существует';
     const ERROR_DIF_PASSWORDS = 'Пароли не совпадают';
@@ -23,7 +23,7 @@ class Validation
 
     public static function checkPassword($password)
     {
-        $pattern = '/^[ -~]{4,63}$/';
+        $pattern = '/^[a-zA-Z0-9!@#$&*]{4,63}$/';
         if (!preg_match($pattern, $password)) {
             return false;
         }
