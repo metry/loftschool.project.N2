@@ -4,7 +4,7 @@ namespace App\Core;
 
 class Validation
 {
-    const MAX_AGE = 122;
+    const MAX_AGE = 99;
     const MIN_AGE = 1;
     const ERROR_NAME = 'Имя - строка 3-21 символов ( A-Z a-z А-Я а-я 0-9 - _)';
     const ERROR_PASSWORD = 'Пароль - строка 4-63 символов (кроме: пробельных - ~)';
