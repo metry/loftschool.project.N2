@@ -7,7 +7,7 @@
         <th>Описание</th>
         <th>Совершеннолетие</th>
         <th>Аватар</th>
-        <!--<th>Действия</th>-->
+        <th>Действия</th>
     </tr>
     <?php foreach ($usersInfo as $userInfo): ?>
     <tr>
@@ -23,11 +23,9 @@
                 <img height="100" src="/img/profiles/<?php echo $userInfo['id'] ?>/<?php echo $userInfo['img'] ?>"/>
             <?php endif ?>
         </td>
-        <!--<td>
-            <a href="">Удалить пользователя</a>
-        </td>-->
+        <td>
+            <a href="/profile/edit/<?php echo $userInfo['id']; ?>">Редактировать</a>
+        </td>
     </tr>
     <?php endforeach; ?>
 </table>
-
-

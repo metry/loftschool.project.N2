@@ -2,14 +2,9 @@
 
 namespace App\Models;
 
-use \App\Core\Connection;
+use \Illuminate\Database\Eloquent\Model;
 
-class MainModel
+class MainModel extends Model
 {
-    protected $dbConnection;
-
-    public function __construct()
-    {
-        $this->dbConnection = Connection::getInstance();
-    }
+    public $timestamps = false;
 }

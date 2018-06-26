@@ -4,7 +4,7 @@ namespace App\Core;
 
 class View
 {
-    public function render(string $contentView, string $templateView, array $data)
+    public function render(string $contentView, string $templateView, $data = [])
     {
         $content = APPLICATION_PATH . "Views/" . $contentView . ".php";
         $template = APPLICATION_PATH . "Views/" . $templateView . ".php";

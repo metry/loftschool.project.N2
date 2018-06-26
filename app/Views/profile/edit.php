@@ -2,7 +2,7 @@
 <?php if ($pageUpdate): ?>
 <h3>Профиль обновлен!</h3>
 <?php endif ?>
-<form enctype="multipart/form-data" action="/profile/edit" method="post">
+<form enctype="multipart/form-data" action="/profile/edit/<?php echo $userInfo['id'] ?>" method="post">
     <div class="form-group">
         <?php if (!$userInfo['img']): ?>
             <img height="200" src="/img/no-photo.jpg"/>

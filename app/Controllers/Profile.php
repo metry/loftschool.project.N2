@@ -7,7 +7,6 @@ use App\Core\Validation;
 use \App\Models\User;
 use \App\Models\File;
 use \App\Core\Autorization;
-use \App\Models\Autorization as AutorizationModel;
 
 class Profile extends MainController
 {
@@ -18,34 +17,32 @@ class Profile extends MainController
     public function index()
     {
         if (!$userId = Autorization::getLoggedUserId()) {
-            $this->view->render('nologged', 'template', []);
+            $this->view->render('nologged', 'template');
             return false;
         };
-        $model = new User();
-        $data = $model->getUserDataById($userId);
 
-        $fileModel = new File();
-        $fileData = $fileModel->getFilesById($userId);
+        $data = User::where('id', '=', $userId)->first(['id', 'name', 'age', 'description', 'img'])->toArray();
+        $fileData = File::where('user_id', '=', $userId)->get()->toArray();
 
         $this->view->render('profile/index', 'template', [
             'userInfo'=>$data,
             'userId'=>$userId,
             'fileData'=>$fileData
         ]);
+        return null;
     }
 
     public function addfile()
     {
         if (!$userId = Autorization::getLoggedUserId()) {
-            $this->view->render('nologged', 'template', []);
+            $this->view->render('nologged', 'template');
             return false;
         };
-        $model = new File();
+
         $errors = [];
+
         if (!empty($_FILES['document']['name'])) {
-            /*
-             * Проверяю путь на существование
-             */
+             //Проверяю пути на существование
             if (!file_exists($path = self::IMG_DIR)) {
                 mkdir($path);
             }
@@ -69,39 +66,47 @@ class Profile extends MainController
             ]);
             $uploadStatus = $imgUploader->upload($_FILES['document']);
             if ($uploadStatus['status']) {
-                $model->addImg($userId, $uploadStatus['filename']);
+                //добавляю информацию о документе в БД
+                $file = new File();
+                $file->user_id = $userId;
+                $file->file = $uploadStatus['filename'];
+                $file->save();
             } else {
                 $errors[] = $uploadStatus['error'];
             }
         }
 
 
-        $fileData = $model->getFilesById($userId);
-
+        $fileData = File::where('user_id', '=', $userId)->get()->toArray();
         $this->view->render('profile/addfile', 'template', [
             'userId'=>$userId,
             'fileData'=>$fileData,
             'errors'=>$errors
         ]);
+        return null;
     }
 
-    public function edit()
+    public function edit($parametres)
     {
         if (!$userId = Autorization::getLoggedUserId()) {
-            $this->view->render('nologged', 'template', []);
+            $this->view->render('nologged', 'template');
             return false;
         };
-        $model = new User();
-        $autorizationModel = new AutorizationModel;
+
+        //получаю Id редактируемого пользователя
+        $userId = ($parametres[0] > 0) ? $userId = (int)$parametres[0] : $userId;
+
+        //проверяю на наличие пользователя в БД по ID (приходящему через get)
+        if (!User::where('id', '=', $userId)->first(['id'])) {
+            throw new \Exception("Указанный пользователь не существует");
+            return null;
+        }
+
         $errors = [];
 
-        /*
-         * Проверка загрузка аватара
-         */
+         //Обновление аватара
         if (!empty($_FILES['logo']['name'])) {
-            /*
-             * Проверяю путь на существование
-             */
+            //Проверяю пути на существование
             if (!file_exists($path = self::IMG_DIR)) {
                 mkdir($path);
             }
@@ -118,14 +123,12 @@ class Profile extends MainController
             $imgUploader->setAllowedMimeTypes(['image/jpeg', 'image/png']);
             $uploadStatus = $imgUploader->upload($_FILES['logo']);
             if ($uploadStatus['status']) {
-                $model->updateImg($userId, $uploadStatus['filename']);
+                User::where('id', '=', $userId)->update(['img' => $uploadStatus['filename']]);
             } else {
                 $errors[] = $uploadStatus['error'];
             }
         }
-        /*
-         * Проверка текстовых данных формы
-         */
+         //Проверка текстовых данных формы
         $pageUpdate = false;
 
         if (!empty($_POST)) {
@@ -136,22 +139,26 @@ class Profile extends MainController
                 $errors[] = Validation::ERROR_AGE;
             }
             if (!$errors) {
-                //проверка: есть ли пользователь с таким именем
-                $checkUserByLowerName = $autorizationModel->checkUserByLowerName($_POST['name']);
-                if (!$checkUserByLowerName || $checkUserByLowerName==$userId) {
-                    $pageUpdate = $model->updateUserDataById(
-                        $userId,
-                        $_POST['name'],
-                        $_POST['age'],
-                        $_POST['description']
-                    );
+                //проверяем наличие пользователя в бд по логину
+                $getUserId = User::whereRaw('LOWER(name) = ?', [$_POST['name']])->first(['id']);
+                if ($getUserId) {
+                    $getUserId = $getUserId->toArray();
+                    $getUserId = $getUserId['id'];
+                }
+                if (!$getUserId || $getUserId==$userId) {
+                    //обновляю пользователя
+                    User::where('id', '=', $userId)->update([
+                        'name' => $_POST['name'],
+                        'age' => $_POST['age'],
+                        'description' => $_POST['description']
+                    ]);
                 } else {
                     $errors[] = Validation::ERROR_USER_EXIST;
                 }
             }
         }
 
-        $data = $model->getUserDataById($userId);
+        $data = User::where('id', '=', $userId)->first(['id', 'name', 'age', 'description', 'img'])->toArray();
 
         $this->view->render('profile/edit', 'template', [
             'userInfo'=>$data,
@@ -159,5 +166,6 @@ class Profile extends MainController
             'pageUpdate'=>$pageUpdate,
             'errors'=>$errors
         ]);
+        return null;
     }
 }

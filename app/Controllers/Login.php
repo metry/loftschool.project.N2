@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Validation;
-use App\Models\Autorization;
+use App\Models\User;
 
 class Login extends MainController
 {
@@ -13,11 +13,20 @@ class Login extends MainController
     {
         $loginStatus = false;
         if (!empty($_POST['name'] && !empty($_POST['password']))) {
-            $model = new Autorization();
             $password = password_hash($_POST['password'], PASSWORD_DEFAULT, ['salt'=>PASSWORD_SALT]);
-            if ($userId = $model->checkUserByPassword(mb_strtolower($_POST['name']), $password)) {
+
+            //проверяем наличие пользователя в бд по логину и паролю
+            $getUserId = User::whereRaw('LOWER(name) = ?', [mb_strtolower($_POST['name'])])
+                ->where('pswhash', '=', $password)
+                ->first(['id']);
+
+            if ($getUserId) {
+                $getUserId = $getUserId->toArray();
+                $userId = $getUserId['id'];
                 $hash = bin2hex(random_bytes(self::RANDOM_LENGTH));
-                $model->setCookieHash($userId, $hash);
+
+                //заношу в бд рандомную строку и передаю ее в куку
+                User::where('id', '=', $userId)->update(['hash' => $hash]);
                 setcookie('id', $userId, 0, '/');
                 setcookie('hash', $hash, 0, '/');
                 $loginStatus = true;
@@ -29,16 +38,13 @@ class Login extends MainController
     public function register()
     {
         $registerStatus = false;
-
         $errors = [];
 
         if (!empty($_POST)) {
-            $model = new Autorization();
-
+            //валидация полей для записи в БД
             if (!Validation::checkPasswords($_POST['password'], $_POST['password2'])) {
                 $errors[] = Validation::ERROR_DIF_PASSWORDS;
             }
-
             if (!Validation::checkName($_POST['name'])) {
                 $errors[] = Validation::ERROR_NAME;
             }
@@ -49,14 +55,25 @@ class Login extends MainController
                 $errors[] = Validation::ERROR_PASSWORD;
             }
             if (!$errors) {
-                if (!$model->checkUserByLowerName(mb_strtolower($_POST['name']))) {
+                //проверяем наличие пользователя в бд по логину
+                $getUserId = User::whereRaw('LOWER(name) = ?', [$_POST['name']])->first(['id']);
+
+                if (!$getUserId) {
+                    //заношу нового пользователя в БД
                     $password = password_hash($_POST['password'], PASSWORD_DEFAULT, ['salt'=>PASSWORD_SALT]);
-                    $userId = $model->addNewUser($_POST['name'], $_POST['age'], $password);
-                    $hash = bin2hex(random_bytes(self::RANDOM_LENGTH));
-                    $model->setCookieHash($userId, $hash);
-                    setcookie('id', $userId, 0, '/');
-                    setcookie('hash', $hash, 0, '/');
-                    $registerStatus = true;
+                    $user = new User();
+                    $user->name = $_POST['name'];
+                    $user->age = $_POST['age'];
+                    $user->pswhash = $password;
+                    if ($user->save()) {
+                        $userId = $user->id;
+                        //заношу в бд рандомную строку и передаю ее в куку
+                        $hash = bin2hex(random_bytes(self::RANDOM_LENGTH));
+                        User::where('id', '=', $userId)->update(['hash' => $hash]);
+                        setcookie('id', $userId, 0, '/');
+                        setcookie('hash', $hash, 0, '/');
+                        $registerStatus = true;
+                    }
                 } else {
                     $errors[] = Validation::ERROR_USER_EXIST;
                 }

@@ -6,10 +6,19 @@
 const APPLICATION_TYPE = 'log';
 
 /*
- * задание соли для хэширования паролей
+ * Задание соли для хэширования паролей
  */
 const PASSWORD_SALT = '12a7gd6GA4SaD2GAs6gavJo2188';
 
+/*
+ * Количество фейковых пользователей и пароль к ним, при создании с использованием Faker
+ */
+const COUNT_FAKE_USERS = 20;
+const DEFAULT_PASSWORD = 12345;
+
+/*
+ * Настройки для работы с БД
+ */
 const HOST = 'localhost';
 const DBNAME = 'database';
 const USER = 'root';

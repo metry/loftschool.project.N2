@@ -8,6 +8,15 @@ require_once APPLICATION_PATH . 'Core/config.php';
 //composer psr-4 autoload
 require_once APPLICATION_PATH . 'vendor/autoload.php';
 
+//Initialize Illuminate Database Connection
+$DataBase = \App\Core\Connection::getInstance();
+//Check connection
+try {
+    $DataBase::connection()->getPdo();
+} catch (\Exception $e) {
+    die("Could not connect to the database. Please check your configuration.");
+}
+
 //request routes
 $routes = explode('/', $_SERVER['REQUEST_URI']);
 
@@ -32,11 +41,9 @@ foreach ($routes as $routeKey => $routeVal) {
         }
     }
 }
-//print_r($controllerName);
-//print_r($actionName);
-//print_r($parametres);
+
 try {
-    $classname = "App\Controllers\\" . ucfirst($controllerName);// \App\Controllers\Main
+    $classname = "App\Controllers\\" . ucfirst($controllerName);
     if (class_exists($classname)) {
         $controller = new $classname();
     } else {
