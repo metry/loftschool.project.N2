@@ -13,12 +13,11 @@ class Autorization
         }
         $result = User::where('id', '=', $_COOKIE['id'])
             ->where('hash', '=', $_COOKIE['hash'])
-            ->first(['id'])
-            ->toArray();
-        $userId = $result['id'];
-        if (!$userId) {
+            ->first(['id']);
+        if (!$result) {
             return false;
         }
-        return $userId;
+        $result = $result->toArray();
+        return $result['id'];
     }
 }
